@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Intelligent Ambulance Dispatch System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://d3js.org/d3.v7.min.js"></script>
+
+<style>
+body {
+    background-color: #0f172a;
+    color: #e5e7eb;
+    font-family: Arial, sans-serif;
+}
+
+header {
+    text-align: center;
+    padding: 30px 0;
+}
+
+.container { max-width: 1300px; }
+
+.layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 24px;
+}
+
+.sidebar, .panel, #results {
+    background: #020617;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    padding: 18px;
+}
+
+label {
+    font-size: 13px;
+    color: #94a3b8;
+}
+
+.form-control, textarea {
+    background: #020617;
+    color: #e5e7eb;
+    border: 1px solid #334155;
+}
+
+.form-control:focus {
+    background: #020617;
+    color: white;
+    box-shadow: none;
+}
+
+button {
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: white;
+}
+
+#graph {
+    background: #020617;
+    border-radius: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h2>Intelligent Ambulance Dispatch & Route Optimization</h2>
+    <p>Greedy Selection + Dijkstra’s Algorithm</p>
+</header>
+
+<div class="container">
+
+<div class="layout">
+
+<form id="dispatchForm" class="sidebar">
+    <h5>Simulation Input</h5>
+
+    <div class="mb-2">
+        <label>Number of Nodes</label>
+        <input id="nodes" type="number" class="form-control" required>
+    </div>
+
+    <div class="mb-2">
+        <label>Number of Edges</label>
+        <input id="edges" type="number" class="form-control" required>
+    </div>
+
+    <div class="mb-2">
+        <label>Edges (u v w)</label>
+        <textarea id="edgeList" rows="4" class="form-control"></textarea>
+    </div>
+
+    <div class="mb-2">
+        <label>Number of Ambulances</label>
+        <input id="numAmbulances" type="number" class="form-control" required>
+    </div>
+
+    <div class="mb-2">
+        <label>Ambulance Locations</label>
+        <input id="ambLocations" class="form-control" placeholder="0 2">
+    </div>
+
+    <div class="mb-2">
+        <label>Incident Node</label>
+        <input id="incident" class="form-control" placeholder="5">
+    </div>
+
+    <button type="submit" class="w-100 mt-2">Run Simulation</button>
+</form>
+
+<div class="panel">
+    <h5>City Road Network</h5>
+    <svg id="graph" width="900" height="520"></svg>
+</div>
+
+</div>
+
+<div id="results" class="mt-4" style="display:none;"></div>
+
+</div>
+
+<script>
+function dijkstra(graph, n, src) {
+    const INF = 1e9;
+    const dist = Array(n).fill(INF);
+    dist[src] = 0;
+    const pq = [[0, src]];
+
+    while (pq.length) {
+        pq.sort((a,b)=>a[0]-b[0]);
+        const [d,u] = pq.shift();
+        if (d > dist[u]) continue;
+
+        for (const [v,w] of graph[u]) {
+            if (dist[v] > d + w) {
+                dist[v] = d + w;
+                pq.push([dist[v], v]);
+            }
+        }
+    }
+    return dist;
+}
+
+function drawGraph(nodes, edges, ambulances, incident) {
+    const svg = d3.select("#graph");
+    svg.selectAll("*").remove();
+
+    const sim = d3.forceSimulation(nodes)
+        .force("link", d3.forceLink(edges).id(d=>d.id).distance(90))
+        .force("charge", d3.forceManyBody().strength(-300))
+        .force("center", d3.forceCenter(450,260));
+
+    const link = svg.append("g")
+        .selectAll("line")
+        .data(edges)
+        .enter().append("line")
+        .attr("stroke", "#475569")
+        .attr("stroke-width", 2);
+
+    const node = svg.append("g")
+        .selectAll("circle")
+        .data(nodes)
+        .enter().append("circle")
+        .attr("r", 16)
+        .attr("fill", d => {
+            if (d.id === incident) return "#ef4444";
+            if (ambulances.includes(d.id)) return "#3b82f6";
+            return "#64748b";
+        });
+
+    const text = svg.append("g")
+        .selectAll("text")
+        .data(nodes)
+        .enter().append("text")
+        .text(d => d.id)
+        .attr("fill", "white")
+        .attr("text-anchor", "middle")
+        .attr("dy", 4);
+
+    sim.on("tick", () => {
+        link.attr("x1", d => d.source.x)
+            .attr("y1", d => d.source.y)
+            .attr("x2", d => d.target.x)
+            .attr("y2", d => d.target.y);
+
+        node.attr("cx", d => d.x).attr("cy", d => d.y);
+        text.attr("x", d => d.x).attr("y", d => d.y);
+    });
+}
+
+document.getElementById("dispatchForm").onsubmit = function(e) {
+    e.preventDefault();
+
+    const n = +nodes.value;
+    const m = +edges.value;
+    const k = +numAmbulances.value;
+    const amb = ambLocations.value.trim().split(" ").map(Number);
+    const incidentNode = +incident.value;
+
+    if (amb.length !== k) {
+        alert("Ambulance count mismatch.");
+        return;
+    }
+
+    if (incidentNode < 0 || incidentNode >= n) {
+        alert("Invalid incident node.");
+        return;
+    }
+
+    const edgeLines = edgeList.value.trim().split("\n");
+    if (edgeLines.length !== m) {
+        alert("Edge count mismatch.");
+        return;
+    }
+
+    const graph = Array.from({length:n},()=>[]);
+    const edgesData = [];
+
+    for (let line of edgeLines) {
+        const [u,v,w] = line.split(" ").map(Number);
+        if (u<0||v<0||u>=n||v>=n||w<=0) {
+            alert("Invalid edge input.");
+            return;
+        }
+        graph[u].push([v,w]);
+        graph[v].push([u,w]);
+        edgesData.push({source:u, target:v});
+    }
+
+    const nodesData = Array.from({length:n},(_,i)=>({id:i}));
+    drawGraph(nodesData, edgesData, amb, incidentNode);
+
+    const dist = dijkstra(graph, n, incidentNode);
+    const chosen = amb.reduce((a,b)=>dist[a]<dist[b]?a:b);
+
+    results.style.display = "block";
+    results.innerHTML = `
+        <h5>Dispatch Result</h5>
+        Selected Ambulance Node: <b>${chosen}</b><br>
+        Minimum Travel Time: <b>${dist[chosen]}</b>
+    `;
+};
+</script>
+
+</body>
+</html>
