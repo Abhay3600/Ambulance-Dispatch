@@ -33,4 +33,15 @@
 
 This repository is maintained as part of the **Design and Analysis of Algorithms Lab** course to submit and document the **course project work** as per academic requirements.
 
+## 📑 Table of Contents
+
+- [📌 Project Overview](01_Project%20Overview.md)
+- [📊 Algorithms and Analysis](02_Algorithms%20and%20Analysis.md)
+- [🧠 Selection of Algorithms](03_Selection%20of%20Algorithms.md)
+- [🧑‍💻 Individual Reflections](04_Individual%20Reflections.md)
+- [🌍 SDG Alignment](05_SDG%20Alignment.md)
+- [🌐 Web Application](06_Web-Application.md)
+- [💻 C++ Implementation](C++%20Implementation/)
+
+
 ---
