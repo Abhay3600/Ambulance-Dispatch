@@ -6,9 +6,9 @@
 ## 📘 Course Information
 
 - **Course Name:** Design and Analysis of Algorithms Lab  
-- **Course Code:** *[25ECSP206]*  
-- **Course Instructor:** *[Ms.Priyadarshini Patil]*  
-- **Academic Year / Semester:** *[2025–26 / 3rd Semester]*  
+- **Course Code:** *25ECSP206*  
+- **Course Instructor:** *Ms.Priyadarshini Patil*  
+- **Academic Year / Semester:** *2025–26 / 3rd Semester*  
 
 ---
 
@@ -24,8 +24,8 @@
 
 ## 🏫 Institution Details
 
-- **Department:** *[Computer Science]*  
-- **University:** *[KLE TECHNOLOGICAL UNIVERSITY]*  
+- **Department:** *Computer Science*  
+- **University:** *KLE TECHNOLOGICAL UNIVERSITY*  
 
 ---
 
