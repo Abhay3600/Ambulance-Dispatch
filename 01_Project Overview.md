@@ -45,3 +45,37 @@ The system must efficiently compute:
 | Ambulance locations | Source nodes |
 | Emergency incident | Destination node |
 
+
+✔ Each call is processed **independently**  
+✔ System computes best ambulance for every call
+
+---
+
+## ⚙️ System Processing Flow
+
+```text
+┌──────────────────┐
+│ Emergency Call   │
+└─────────┬────────┘
+          ↓
+┌──────────────────────────┐
+│ Shortest Path Computation│
+│ (Graph Algorithms)       │
+└─────────┬────────────────┘
+          ↓
+┌──────────────────────────┐
+│ Compute Travel Time from │
+│ Each Ambulance           │
+└─────────┬────────────────┘
+          ↓
+┌──────────────────────────┐
+│ Greedy Selection of      │
+│ Minimum Response Time    │
+└─────────┬────────────────┘
+          ↓
+┌──────────────────────────┐
+│ Ambulance Dispatch       │
+│ Decision                 │
+└──────────────────────────┘
+
+
