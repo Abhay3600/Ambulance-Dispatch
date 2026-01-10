@@ -41,7 +41,7 @@ This repository is maintained as part of the **Design and Analysis of Algorithms
 - [🧑‍💻 Individual Reflections](04_Individual%20Reflections.md)
 - [🌍 SDG Alignment](05_SDG%20Alignment.md)
 - [🌐 Web Application](06_Web-Application.md)
-- [💻 C++ Implementation](C++%20Implementation/)
+- [💻 C++ Implementation](src/)
 
 
 ---
